@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { sendMessage, onMessageReceived } from "./socket";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import HomeView from "./View/HomeView";
+import BattleView from "./View/BattleView";
+import ResultView from "./View/ResultView";
 
 const App: React.FC = () => {
   const [message, setMessage] = useState("");
@@ -19,27 +23,19 @@ const App: React.FC = () => {
 
   const handleSendMessage = () => {
     if (message.trim()) {
-      sendMessage(message); // メッセージを送信
-      setMessage(""); // 送信後に入力欄をクリア
+      sendMessage(message);
+      setMessage("");
     }
   };
 
   return (
-    <div>
-      <h1>Chat App</h1>
-      <ul>
-        {messages.map((msg, index) => (
-          <li key={index}>{msg}</li>
-        ))}
-      </ul>
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type a message"
-      />
-      <button onClick={handleSendMessage}>Send</button>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/battle" element={<BattleView />} />
+        <Route path="/result" element={<ResultView />} />
+        <Route path="/" element={<HomeView />} />
+      </Routes>
+    </Router>
   );
 };
 
