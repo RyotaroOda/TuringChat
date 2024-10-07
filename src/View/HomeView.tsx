@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { requestMatch, onMatchFound } from "../socket";
+import { useNavigate } from "react-router-dom";
+import { requestMatch, onMatchFound, savePlayerName } from "../socket";
 
 const HomeView: React.FC = () => {
-  const [playerName, setPlayerName] = useState("ゲスト");
+  const [playerName, setPlayerName] = useState("");
   const [playerScore, setPlayerScore] = useState(9999);
   const [aiPrompt, setAiPrompt] = useState("Input AI prompt here");
 
@@ -16,13 +16,19 @@ const HomeView: React.FC = () => {
   const navigate = useNavigate();
 
   const startMatch = () => {
+    if (playerName === "") {
+      setPlayerName("ゲスト");
+    }
+    savePlayerName(playerName);
     setIsMatching(true);
     requestMatch();
 
     //マッチング成功時のバトル画面へ遷移
     onMatchFound((data) => {
       console.log("Match found with opponent:", data.opponentId);
-      navigate("/battle/${data.roomID}");
+      navigate(`/battle/${data.roomId}`, {
+        state: { opponentName: data.opponentName },
+      });
       // setIsMatching(false);
     });
   };
@@ -31,6 +37,12 @@ const HomeView: React.FC = () => {
     <div>
       <h1>ホーム</h1>
       <p>PlayerName: {playerName}</p>
+      <input
+        type="text"
+        placeholder="Enter your name"
+        value={playerName}
+        onChange={(e) => setPlayerName(e.target.value)}
+      />
       <p>Score: {playerScore}</p>
       <div>
         <label>

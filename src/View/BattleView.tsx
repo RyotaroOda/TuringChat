@@ -1,20 +1,65 @@
-import React, { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useParams, useLocation } from "react-router-dom";
+import socket, {
+  sendMessage,
+  onMessageReceived,
+  onActivePlayerUpdate,
+  onTurnCountUpdate,
+  onBattleEnd,
+} from "../socket";
 
 const BattleView: React.FC = () => {
   const [chatLog, setChatLog] = useState<string[]>([]);
-  const [remainingMessages, setRemainingMessages] = useState(10);
   const [remainingTime, setRemainingTime] = useState(60); // in seconds
-  const [turnPlayer, setTurnPlayer] = useState("Player1");
-  const [opponentName, setOpponentName] = useState("Opponent1");
-  const [nextMessage, setNextMessage] = useState("");
+  const location = useLocation();
+  const opponentName = location.state?.opponentName || "Opponent";
   const { roomId } = useParams<{ roomId: string }>();
+  const [message, setMessage] = useState("");
+  const [activePlayer, setActivePlayer] = useState("");
+  const [isMyTurn, setIsMyTurn] = useState(true); // 仮の状態
+  const [turnCount, setTurnCount] = useState(0);
+  const [maxTurn, setMaxTurn] = useState(6);
+
+  useEffect(() => {
+    // サーバーからメッセージを受け取った時の処理
+    onMessageReceived((msg: string) => {
+      setChatLog((prevChatLog) => [...prevChatLog, msg]);
+    });
+
+    //ターン更新時
+    onActivePlayerUpdate((data) => {
+      setActivePlayer(data.activePlayer);
+      setIsMyTurn(data.activePlayer === socket.id); //自分のターンかどうか
+    });
+
+    //メッセージ数更新時
+    onTurnCountUpdate((data) => {
+      setTurnCount(data.messageCount);
+      setMaxTurn(data.maxMessages);
+    });
+
+    //バトル終了時
+    onBattleEnd((data) => {
+      alert("バトル終了");
+      console.log("Battle ended with roomId:", data.roomId);
+      // Implement battle end logic here
+    });
+
+    return () => {
+      // クリーンアップ時にリスナーを解除
+      // socket.off("chat message")はsocket.tsで実装する場合もあり
+    };
+  }, []);
 
   const handleSendMessage = () => {
-    if (nextMessage.trim() !== "") {
-      setChatLog([...chatLog, nextMessage]);
-      setNextMessage("");
-      // Implement message sending logic here
+    if (message.trim() && isMyTurn) {
+      if (roomId) {
+        sendMessage(roomId, message);
+        setChatLog((prevChatLog) => [...prevChatLog, message]); // 自分のメッセージをチャットログに追加
+      } else {
+        console.error("Room ID is undefined");
+      }
+      setMessage("");
     }
   };
 
@@ -35,20 +80,22 @@ const BattleView: React.FC = () => {
           ))}
         </ul>
       </div>
-      <p>残りメッセージ数: {remainingMessages}</p>
+      <p>残りメッセージ数: {maxTurn - turnCount}</p>
       <p>このターンの残り時間: {remainingTime}秒</p>
-      <p>ターンプレーヤー: {turnPlayer}</p>
+      <p>ターンプレーヤー: {activePlayer === socket.id ? "あなた" : "相手"}</p>
       <p>相手のプレイヤーネーム: {opponentName}</p>
       <div>
         <label>
-          次のメッセージ:
+          メッセージ:
           <input
             type="text"
-            value={nextMessage}
-            onChange={(e) => setNextMessage(e.target.value)}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
           />
         </label>
-        <button onClick={handleSendMessage}>送信</button>
+        <button onClick={handleSendMessage} disabled={!isMyTurn}>
+          {isMyTurn ? "送信" : "Wait for your turn"}
+        </button>
       </div>
       <Link to="/result">
         <button onClick={handleFinishMatching}>バトル終了</button>
