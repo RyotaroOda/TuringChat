@@ -68,29 +68,29 @@ io.on("connection", (socket) => {
       io.to(roomId).emit("turnCountUpdate", { turnCount });
 
       // メッセージ受信処理
-      socket.on("sendMessage", (data) => {
-        const { roomId, message } = data;
-        console.log("index message", message);
-        //ターンプレイヤーが自分であることを確認
-        if (socket.id !== activePlayer) {
-          turnCount++;
-          io.to(roomId).emit("receiveMessage", {
-            message,
-            senderId: socket.id,
-          });
+      //socket.on("sendMessage", (data) => {
+      //   const { roomId, message } = data;
+      //   console.log("index message", message);
+      //   //ターンプレイヤーが自分であることを確認
+      //   if (socket.id !== activePlayer) {
+      //     turnCount++;
+      //     io.to(roomId).emit("receiveMessage", {
+      //       message,
+      //       senderId: socket.id,
+      //     });
 
-          // ターンプレイヤーの切り替え
-          activePlayer = activePlayer === player1.id ? player2.id : player1.id;
-          io.to(roomId).emit("activePlayerUpdate", { activePlayer });
-          io.to(roomId).emit("turnCountUpdate", { turnCount });
+      //     // ターンプレイヤーの切り替え
+      //     activePlayer = activePlayer === player1.id ? player2.id : player1.id;
+      //     io.to(roomId).emit("activePlayerUpdate", { activePlayer });
+      //     io.to(roomId).emit("turnCountUpdate", { turnCount });
 
-          //ターン上限に達した場合
-          if (turnCount >= battleConfig.maxTurn) {
-            io.to(roomId).emit("battleEnd", { roomId });
-            return;
-          }
-        }
-      });
+      //     //ターン上限に達した場合
+      //     if (turnCount >= battleConfig.maxTurn) {
+      //       io.to(roomId).emit("battleEnd", { roomId });
+      //       return;
+      //     }
+      //   }
+      // });
     }
   });
 

@@ -11,6 +11,7 @@ import socket, {
 const BattleView: React.FC = () => {
   const [chatLog, setChatLog] = useState<string[]>([]);
   const location = useLocation();
+  const opponentId = location.state?.matchData.opponentId || "error";
   const opponentName = location.state?.matchData.opponentName || "error";
   const { roomId } = useParams<{ roomId: string }>();
   const [message, setMessage] = useState("");
@@ -24,7 +25,11 @@ const BattleView: React.FC = () => {
   useEffect(() => {
     // サーバーからメッセージを受け取った時の処理
     onMessageReceived((data) => {
-      setChatLog((prevChatLog) => [...prevChatLog, data.message]);
+      if (data.senderId === opponentId) {
+        if (data.senderId === opponentId) {
+          setChatLog((prevChatLog) => [...prevChatLog, data.message]);
+        }
+      }
     });
 
     //ターン更新時
