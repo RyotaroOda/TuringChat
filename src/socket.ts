@@ -24,4 +24,16 @@ export const onMessageReceived = (callback: (message: string) => void) => {
   socket.on("chat message", callback);
 };
 
-// 必要に応じて他のイベントやエミッターを追加可能
+//マッチングリクエストを送信
+export const requestMatch = () => {
+  socket.emit("requestMatch");
+};
+
+//マッチング成功時の処理
+export const onMatchFound = (
+  callback: (data: { roomId: string; opponentId: string }) => void,
+) => {
+  socket.on("matchFound", callback);
+};
+
+export default socket;

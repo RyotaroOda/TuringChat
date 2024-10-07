@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { requestMatch, onMatchFound } from "../socket";
 
 const HomeView: React.FC = () => {
   const [playerName, setPlayerName] = useState("ゲスト");
@@ -9,6 +10,21 @@ const HomeView: React.FC = () => {
   const handleStartMatching = () => {
     console.log("Starting random matching...");
     // Implement random matching logic here
+  };
+
+  const [isMatching, setIsMatching] = useState(false);
+  const navigate = useNavigate();
+
+  const startMatch = () => {
+    setIsMatching(true);
+    requestMatch();
+
+    //マッチング成功時のバトル画面へ遷移
+    onMatchFound((data) => {
+      console.log("Match found with opponent:", data.opponentId);
+      navigate("/battle/${data.roomID}");
+      // setIsMatching(false);
+    });
   };
 
   return (
@@ -26,9 +42,9 @@ const HomeView: React.FC = () => {
           />
         </label>
       </div>
-      <Link to="/battle">
-        <button onClick={handleStartMatching}>バトル開始</button>
-      </Link>
+      <button onClick={startMatch} disabled={isMatching}>
+        {isMatching ? "Matching..." : "Start Matching"}
+      </button>
     </div>
   );
 };

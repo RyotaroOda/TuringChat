@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 const BattleView: React.FC = () => {
   const [chatLog, setChatLog] = useState<string[]>([]);
@@ -8,6 +8,7 @@ const BattleView: React.FC = () => {
   const [turnPlayer, setTurnPlayer] = useState("Player1");
   const [opponentName, setOpponentName] = useState("Opponent1");
   const [nextMessage, setNextMessage] = useState("");
+  const { roomId } = useParams<{ roomId: string }>();
 
   const handleSendMessage = () => {
     if (nextMessage.trim() !== "") {
@@ -25,6 +26,7 @@ const BattleView: React.FC = () => {
   return (
     <div>
       <h1>対戦画面</h1>
+      <p>ルームID: {roomId}</p>
       <div>
         <h2>チャットログ</h2>
         <ul>

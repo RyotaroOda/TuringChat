@@ -31,7 +31,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/battle" element={<BattleView />} />
+        <Route path="/battle/:roomId" element={<BattleView />} />
         <Route path="/result" element={<ResultView />} />
         <Route path="/" element={<HomeView />} />
       </Routes>
