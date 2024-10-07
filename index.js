@@ -1,4 +1,3 @@
-const { data } = require("autoprefixer");
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -7,6 +6,14 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 const { v4: uuidv4 } = require("uuid");
+
+// バトル設定データを生成
+const battleConfig = {
+  maxTurn: 6 * 2, // 最大ターン数
+  battleType: "single", // バトルタイプ
+  oneTurnTime: 60, // 1ターンの制限時間
+  //TODO: ChatTopic
+};
 
 let waitingPlayers = []; //待機リスト
 
@@ -42,11 +49,13 @@ io.on("connection", (socket) => {
         roomId,
         opponentId: player2.id,
         opponentName: player2.playerName,
+        battleConfig,
       });
       player2.emit("matchFound", {
         roomId,
         opponentId: player1.id,
         opponentName: player1.playerName,
+        battleConfig,
       });
 
       console.log("Matched between players:", player1, player2);
@@ -54,19 +63,18 @@ io.on("connection", (socket) => {
       // ゲーム開始
       let activePlayer = player1.id; //TODO:ランダムにする
       let turnCount = 0;
-      const maxTurn = 5 * 2; //5ターンずつ
 
       io.to(roomId).emit("activePlayerUpdate", { activePlayer });
-      io.to(roomId).emit("turnCountUpdate", { turnCount, maxTurn });
+      io.to(roomId).emit("turnCountUpdate", { turnCount });
 
       // メッセージ受信処理
       socket.on("sendMessage", (data) => {
         const { roomId, message } = data;
-
+        console.log("index message", message);
         //ターンプレイヤーが自分であることを確認
         if (socket.id !== activePlayer) {
           turnCount++;
-          io.to(roomId).emit("recieveMessage", {
+          io.to(roomId).emit("receiveMessage", {
             message,
             senderId: socket.id,
           });
@@ -74,16 +82,28 @@ io.on("connection", (socket) => {
           // ターンプレイヤーの切り替え
           activePlayer = activePlayer === player1.id ? player2.id : player1.id;
           io.to(roomId).emit("activePlayerUpdate", { activePlayer });
-          io.to(roomId).emit("turnCountUpdate", { turnCount, maxTurn });
+          io.to(roomId).emit("turnCountUpdate", { turnCount });
 
           //ターン上限に達した場合
-          if (turnCount >= maxTurn) {
+          if (turnCount >= battleConfig.maxTurn) {
             io.to(roomId).emit("battleEnd", { roomId });
             return;
           }
         }
       });
     }
+  });
+
+  // **メッセージ送信処理**: sendMessageイベントが発火したときの動作を定義
+  socket.on("sendMessage", (data) => {
+    const { roomId, message } = data;
+    console.log(`Message received in room ${roomId}: ${message}`);
+
+    // メッセージを同じルーム内のすべてのクライアントにブロードキャスト
+    io.to(roomId).emit("receiveMessage", {
+      message,
+      senderId: socket.id,
+    });
   });
 
   // 切断時に待機中のリストから削除

@@ -10,20 +10,21 @@ import socket, {
 
 const BattleView: React.FC = () => {
   const [chatLog, setChatLog] = useState<string[]>([]);
-  const [remainingTime, setRemainingTime] = useState(60); // in seconds
   const location = useLocation();
-  const opponentName = location.state?.opponentName || "Opponent";
+  const opponentName = location.state?.matchData.opponentName || "error";
   const { roomId } = useParams<{ roomId: string }>();
   const [message, setMessage] = useState("");
   const [activePlayer, setActivePlayer] = useState("");
   const [isMyTurn, setIsMyTurn] = useState(true); // 仮の状態
   const [turnCount, setTurnCount] = useState(0);
-  const [maxTurn, setMaxTurn] = useState(6);
+  const maxTurn = location.state?.matchData.battleConfig.maxTurn || 10;
+  const oneTurnTime = location.state?.matchData.battleConfig.oneTurnTime || 60; // in seconds
+  const [remainingTime, setRemainingTime] = useState(oneTurnTime);
 
   useEffect(() => {
     // サーバーからメッセージを受け取った時の処理
-    onMessageReceived((msg: string) => {
-      setChatLog((prevChatLog) => [...prevChatLog, msg]);
+    onMessageReceived((data) => {
+      setChatLog((prevChatLog) => [...prevChatLog, data.message]);
     });
 
     //ターン更新時
@@ -32,10 +33,9 @@ const BattleView: React.FC = () => {
       setIsMyTurn(data.activePlayer === socket.id); //自分のターンかどうか
     });
 
-    //メッセージ数更新時
+    //ターン数更新時
     onTurnCountUpdate((data) => {
       setTurnCount(data.messageCount);
-      setMaxTurn(data.maxMessages);
     });
 
     //バトル終了時
@@ -56,10 +56,10 @@ const BattleView: React.FC = () => {
       if (roomId) {
         sendMessage(roomId, message);
         setChatLog((prevChatLog) => [...prevChatLog, message]); // 自分のメッセージをチャットログに追加
+        setMessage("");
       } else {
         console.error("Room ID is undefined");
       }
-      setMessage("");
     }
   };
 

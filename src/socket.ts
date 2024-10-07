@@ -17,10 +17,13 @@ socket.on("disconnect", () => {
 // メッセージを送信
 export const sendMessage = (roomId: string, message: string) => {
   socket.emit("sendMessage", { roomId, message });
+  console.log("Sent socket message:", message);
 };
 
 // サーバーからメッセージを受け取るリスナー
-export const onMessageReceived = (callback: (message: string) => void) => {
+export const onMessageReceived = (
+  callback: (data: { senderId: string; message: string }) => void,
+) => {
   socket.on("receiveMessage", callback);
 };
 
@@ -40,6 +43,7 @@ export const onMatchFound = (
     roomId: string;
     opponentId: string;
     opponentName: string;
+    battleConfig: any;
   }) => void,
 ) => {
   socket.on("matchFound", callback);
@@ -54,7 +58,7 @@ export const onActivePlayerUpdate = (
 
 // メッセージ数更新リスナー
 export const onTurnCountUpdate = (
-  callback: (data: { messageCount: number; maxMessages: number }) => void,
+  callback: (data: { messageCount: number }) => void,
 ) => {
   socket.on("turnCountUpdate", callback);
 };

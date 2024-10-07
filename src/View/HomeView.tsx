@@ -27,7 +27,7 @@ const HomeView: React.FC = () => {
     onMatchFound((data) => {
       console.log("Match found with opponent:", data.opponentId);
       navigate(`/battle/${data.roomId}`, {
-        state: { opponentName: data.opponentName },
+        state: { matchData: data },
       });
       // setIsMatching(false);
     });
