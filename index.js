@@ -15,6 +15,22 @@ const battleConfig = {
   //TODO: ChatTopic
 };
 
+// バトルログ
+const battleLog = {
+  currentTurn: 0,
+  messages: [],
+  activePlayer: null,
+};
+
+// ルーム情報を保持するオブジェクト
+const battleRooms = {
+  roomId: null,
+  player1: null,
+  player2: null,
+  battleConfig: null,
+  battleLog: null,
+};
+
 let waitingPlayers = []; //待機リスト
 
 //WebSocket接続時の処理
@@ -40,6 +56,14 @@ io.on("connection", (socket) => {
       const player2 = socket;
       const roomId = uuidv4(); // ユニークなIdを生成
 
+      // ルーム固有の情報
+      battleRooms[roomId] = {
+        player1: player1.id,
+        player2: player2.id,
+        battleConfig,
+        battleLog,
+      };
+
       // 両プレイヤーを部屋に入れる
       player1.join(roomId);
       player2.join(roomId);
@@ -47,6 +71,7 @@ io.on("connection", (socket) => {
       // マッチング成立を通知
       player1.emit("matchFound", {
         roomId,
+        myId: player1.id,
         opponentId: player2.id,
         opponentName: player2.playerName,
         battleConfig,
@@ -59,57 +84,55 @@ io.on("connection", (socket) => {
       });
 
       console.log("Matched between players:", player1, player2);
-
-      // ゲーム開始
-      let activePlayer = player1.id; //TODO:ランダムにする
-      let turnCount = 0;
-
-      io.to(roomId).emit("activePlayerUpdate", { activePlayer });
-      io.to(roomId).emit("turnCountUpdate", { turnCount });
-
-      // メッセージ受信処理
-      //socket.on("sendMessage", (data) => {
-      //   const { roomId, message } = data;
-      //   console.log("index message", message);
-      //   //ターンプレイヤーが自分であることを確認
-      //   if (socket.id !== activePlayer) {
-      //     turnCount++;
-      //     io.to(roomId).emit("receiveMessage", {
-      //       message,
-      //       senderId: socket.id,
-      //     });
-
-      //     // ターンプレイヤーの切り替え
-      //     activePlayer = activePlayer === player1.id ? player2.id : player1.id;
-      //     io.to(roomId).emit("activePlayerUpdate", { activePlayer });
-      //     io.to(roomId).emit("turnCountUpdate", { turnCount });
-
-      //     //ターン上限に達した場合
-      //     if (turnCount >= battleConfig.maxTurn) {
-      //       io.to(roomId).emit("battleEnd", { roomId });
-      //       return;
-      //     }
-      //   }
-      // });
     }
   });
 
-  // **メッセージ送信処理**: sendMessageイベントが発火したときの動作を定義
+  // メッセージ送信
   socket.on("sendMessage", (data) => {
     const { roomId, message } = data;
-    console.log(`Message received in room ${roomId}: ${message}`);
+
+    // ルーム情報を取得
+    const battleRoom = battleRooms[roomId];
+    if (!battleRoom) {
+      console.error("Room not found:", roomId);
+      return;
+    }
+
+    // メッセージをバトルログに追加
+    battleRoom.battleLog.messages.push({
+      senderId: socket.id,
+      message,
+    });
+
+    //ターン更新
+    battleRoom.battleLog.currentTurn += 1;
+    battleRoom.battleLog.activePlayer =
+      battleRoom.battleLog.activePlayer === battleRoom.player1
+        ? battleRoom.player2
+        : battleRoom.player1;
+    //ターン上限に達した場合
+    if (battleRoom.battleLog.currentTurn >= battleRoom.battleConfig.maxTurn) {
+      io.to(roomId).emit("battleEnd", { roomId });
+      return;
+    }
 
     // メッセージを同じルーム内のすべてのクライアントにブロードキャスト
     io.to(roomId).emit("receiveMessage", {
       message,
       senderId: socket.id,
     });
+
+    io.to(roomId).emit("turnUpdate", { battleRoom });
   });
 
-  // 切断時に待機中のリストから削除
+  // プレイヤーが切断したときの処理
   socket.on("disconnect", () => {
-    console.log("Player disconnected:", socket.id);
+    // プレイヤーが待機中のリストにいたら削除
     waitingPlayers = waitingPlayers.filter((player) => player.id !== socket.id);
+    console.log("Player disconnected:", socket.id);
+
+    // ルームからプレイヤーが切断した場合の処理（ルーム内の残りのプレイヤーに通知など）
+    // ここにルームの終了や他プレイヤーへの通知を行う処理を追加できます。
   });
 });
 
