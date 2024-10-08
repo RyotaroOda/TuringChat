@@ -11,11 +11,7 @@ const HomeView: React.FC = () => {
     console.log("Starting random matching...");
     // Implement random matching logic here
   };
-  const myData = {
-    playerName,
-    playerScore,
-    aiPrompt,
-  };
+
   const [isMatching, setIsMatching] = useState(false);
   const navigate = useNavigate();
 
