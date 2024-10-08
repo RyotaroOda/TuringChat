@@ -11,7 +11,11 @@ const HomeView: React.FC = () => {
     console.log("Starting random matching...");
     // Implement random matching logic here
   };
-
+  const myData = {
+    playerName,
+    playerScore,
+    aiPrompt,
+  };
   const [isMatching, setIsMatching] = useState(false);
   const navigate = useNavigate();
 
@@ -22,8 +26,9 @@ const HomeView: React.FC = () => {
   };
 
   const startMatch = () => {
-    const saveName = playerName === "" ? "ゲスト" : playerName;
-    savePlayerName(saveName);
+    const nameToSave = playerName === "" ? "ゲスト" : playerName;
+    setPlayerName(nameToSave);
+    savePlayerName(nameToSave);
     setIsMatching(true);
     requestMatch();
 
@@ -33,7 +38,7 @@ const HomeView: React.FC = () => {
       navigate(`/battle/${data.roomId}`, {
         state: { matchData: data, myData },
       });
-      // setIsMatching(false);
+      setIsMatching(false);
     });
   };
 
@@ -58,6 +63,9 @@ const HomeView: React.FC = () => {
           />
         </label>
       </div>
+      <a href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
+        Learn React
+      </a>
       <button onClick={startMatch} disabled={isMatching}>
         {isMatching ? "Matching..." : "Start Matching"}
       </button>
