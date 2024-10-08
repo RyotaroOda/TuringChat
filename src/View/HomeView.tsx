@@ -2,26 +2,32 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { requestMatch, onMatchFound, savePlayerName } from "../socket";
 
-const HomeView: React.FC = () => {
-  const [playerName, setPlayerName] = useState("");
-  const [playerScore, setPlayerScore] = useState(9999);
-  const [aiPrompt, setAiPrompt] = useState("Input AI prompt here");
+interface MyData {
+  playerName: string;
+  playerScore: number;
+  aiPrompt: string;
+}
 
-  const handleStartMatching = () => {
+const HomeView: React.FC = () => {
+  const [playerName, setPlayerName] = useState<string>("");
+  const [playerScore, setPlayerScore] = useState<number>(9999);
+  const [aiPrompt, setAiPrompt] = useState<string>("Input AI prompt here");
+
+  const handleStartMatching = (): void => {
     console.log("Starting random matching...");
     // Implement random matching logic here
   };
 
-  const [isMatching, setIsMatching] = useState(false);
+  const [isMatching, setIsMatching] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const myData = {
+  const myData: MyData = {
     playerName,
     playerScore,
     aiPrompt,
   };
 
-  const startMatch = () => {
+  const startMatch = (): void => {
     const nameToSave = playerName === "" ? "ゲスト" : playerName;
     setPlayerName(nameToSave);
     savePlayerName(nameToSave);
@@ -59,9 +65,6 @@ const HomeView: React.FC = () => {
           />
         </label>
       </div>
-      <a href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-        Learn React
-      </a>
       <button onClick={startMatch} disabled={isMatching}>
         {isMatching ? "Matching..." : "Start Matching"}
       </button>

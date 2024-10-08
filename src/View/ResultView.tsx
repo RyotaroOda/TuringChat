@@ -1,12 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
 const ResultView: React.FC = () => {
-  const playerAnswers = ["Answer1", "Answer2"]; // Example data
-  const opponentAnswers = ["Answer1", "Answer2"]; // Example data
-  const playerSuccess = [true, false]; // Example data
-  const opponentSuccess = [true, true]; // Example data
-  const playerScore = 1000; // Example data
-  const battleScore = 50; // Example data
+  const playerAnswers: string[] = ["Answer1", "Answer2"]; // Example data
+  const opponentAnswers: string[] = ["Answer1", "Answer2"]; // Example data
+  const playerSuccess: boolean[] = [true, false]; // Example data
+  const opponentSuccess: boolean[] = [true, true]; // Example data
+  const playerScore: number = 1000; // Example data
+  const battleScore: number = 50; // Example data
 
   const handleGoHome = () => {
     console.log("Navigating to HomeView...");

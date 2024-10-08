@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { Link, useParams, useLocation } from "react-router-dom";
-import socket, {
-  sendMessage,
-  onMessageReceived,
-  onTurnUpdate,
-  onBattleEnd,
-} from "../socket";
+import { Link, useLocation, useParams } from "react-router-dom";
+import socket, { sendMessage } from "../socket";
+
+interface MatchData {
+  myId: string;
+  opponentId: string;
+  opponentName: string;
+  battleConfig: {
+    maxTurn: number;
+    oneTurnTime: number;
+  };
+}
+
+interface LocationState {
+  myData: {
+    playerName: string;
+  };
+  matchData: MatchData;
+}
 
 const BattleView: React.FC = () => {
   const [chatLog, setChatLog] = useState<
@@ -13,17 +25,16 @@ const BattleView: React.FC = () => {
   >([]);
   const location = useLocation();
   const myName = location.state?.myData.playerName + "(あなた)" || "error";
-  // const myId = location.state?.matchData.myId || "error";
   const myId = socket.id || "error";
   const opponentId = location.state?.matchData.opponentId || "error";
   const opponentName = location.state?.matchData.opponentName || "error";
   const { roomId } = useParams<{ roomId: string }>();
-  const [message, setMessage] = useState("");
-  const [isMyTurn, setIsMyTurn] = useState(true); // 仮の状態
-  const [turnCount, setTurnCount] = useState(0);
+  const [message, setMessage] = useState<string>("");
+  const [isMyTurn, setIsMyTurn] = useState<boolean>(true); // 仮の状態
+  const [turnCount, setTurnCount] = useState<number>(0);
   const maxTurn = location.state?.matchData.battleConfig.maxTurn || 10;
   const oneTurnTime = location.state?.matchData.battleConfig.oneTurnTime || 60; // in seconds
-  const [remainingTime, setRemainingTime] = useState(oneTurnTime);
+  const [remainingTime, setRemainingTime] = useState<number>(oneTurnTime);
 
   // プレイヤーIDとネームの対応を保存
   const playerNames: { [key: string]: string } = {
