@@ -15,11 +15,15 @@ const HomeView: React.FC = () => {
   const [isMatching, setIsMatching] = useState(false);
   const navigate = useNavigate();
 
+  const myData = {
+    playerName,
+    playerScore,
+    aiPrompt,
+  };
+
   const startMatch = () => {
-    if (playerName === "") {
-      setPlayerName("ゲスト");
-    }
-    savePlayerName(playerName);
+    const saveName = playerName === "" ? "ゲスト" : playerName;
+    savePlayerName(saveName);
     setIsMatching(true);
     requestMatch();
 
@@ -27,7 +31,7 @@ const HomeView: React.FC = () => {
     onMatchFound((data) => {
       console.log("Match found with opponent:", data.opponentId);
       navigate(`/battle/${data.roomId}`, {
-        state: { matchData: data },
+        state: { matchData: data, myData },
       });
       // setIsMatching(false);
     });
