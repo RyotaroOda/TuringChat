@@ -25,6 +25,7 @@ export const onMessageReceived = (
   callback: (data: { senderId: string; message: string }) => void,
 ) => {
   socket.on("receiveMessage", callback);
+  console.log("Listening for messages...");
 };
 
 //マッチングリクエストを送信

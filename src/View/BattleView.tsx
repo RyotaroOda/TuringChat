@@ -9,7 +9,9 @@ import socket, {
 } from "../socket";
 
 const BattleView: React.FC = () => {
-  const [chatLog, setChatLog] = useState<string[]>([]);
+  const [chatLog, setChatLog] = useState<
+    { senderId: string; message: string }[]
+  >([]);
   const location = useLocation();
   const opponentId = location.state?.matchData.opponentId || "error";
   const opponentName = location.state?.matchData.opponentName || "error";
@@ -23,36 +25,66 @@ const BattleView: React.FC = () => {
   const [remainingTime, setRemainingTime] = useState(oneTurnTime);
 
   useEffect(() => {
-    // サーバーからメッセージを受け取った時の処理
-    onMessageReceived((data) => {
+    // メッセージ受信リスナーの登録
+    const messageHandler = (data: { senderId: string; message: string }) => {
+      // 送信者が相手プレイヤーだった場合のみチャットログを更新
       if (data.senderId === opponentId) {
-        if (data.senderId === opponentId) {
-          setChatLog((prevChatLog) => [...prevChatLog, data.message]);
-        }
+        console.log(
+          `Message received from opponent (${data.senderId}): ${data.message}`,
+        );
+        setChatLog((prevChatLog) => [
+          ...prevChatLog,
+          { senderId: data.senderId, message: data.message }, // メッセージをオブジェクトとして保存
+        ]);
       }
-    });
+    };
 
-    //ターン更新時
-    onActivePlayerUpdate((data) => {
-      setActivePlayer(data.activePlayer);
-      setIsMyTurn(data.activePlayer === socket.id); //自分のターンかどうか
-    });
+    // メッセージ受信リスナーを登録
+    socket.on("receiveMessage", messageHandler);
 
-    //ターン数更新時
-    onTurnCountUpdate((data) => {
-      setTurnCount(data.messageCount);
-    });
-
-    //バトル終了時
-    onBattleEnd((data) => {
-      alert("バトル終了");
-      console.log("Battle ended with roomId:", data.roomId);
-      // Implement battle end logic here
-    });
-
+    // クリーンアップ関数でリスナーを解除
     return () => {
-      // クリーンアップ時にリスナーを解除
-      // socket.off("chat message")はsocket.tsで実装する場合もあり
+      socket.off("receiveMessage", messageHandler);
+    };
+  }, [opponentId]); // opponentId を依存関係に追加
+
+  useEffect(() => {
+    // ターン更新リスナー
+    const turnHandler = (data: { currentTurn: string }) => {
+      setActivePlayer(data.currentTurn);
+      setIsMyTurn(data.currentTurn === socket.id); // 自分のターンかどうかをチェック
+    };
+    socket.on("turnUpdate", turnHandler);
+
+    // クリーンアップ関数でリスナーを解除
+    return () => {
+      socket.off("turnUpdate", turnHandler);
+    };
+  }, []);
+
+  useEffect(() => {
+    // メッセージ数更新リスナー
+    const messageCountHandler = (data: { messageCount: number }) => {
+      setTurnCount(data.messageCount);
+    };
+    socket.on("messageCountUpdate", messageCountHandler);
+
+    // クリーンアップ関数でリスナーを解除
+    return () => {
+      socket.off("messageCountUpdate", messageCountHandler);
+    };
+  }, []);
+
+  useEffect(() => {
+    // バトル終了リスナー
+    const battleEndHandler = () => {
+      alert("Battle Ended!");
+    };
+    socket.on("battleEnd", battleEndHandler);
+
+    // クリーンアップ関数でリスナーを解除
+    return () => {
+      socket.off("battleEnd", battleEndHandler);
     };
   }, []);
 
@@ -60,7 +92,10 @@ const BattleView: React.FC = () => {
     if (message.trim() && isMyTurn) {
       if (roomId) {
         sendMessage(roomId, message);
-        setChatLog((prevChatLog) => [...prevChatLog, message]); // 自分のメッセージをチャットログに追加
+        setChatLog((prevChatLog) => [
+          ...prevChatLog,
+          { senderId: socket.id || "unknown", message },
+        ]); // 自分のメッセージをチャットログに追加
         setMessage("");
       } else {
         console.error("Room ID is undefined");
@@ -81,7 +116,7 @@ const BattleView: React.FC = () => {
         <h2>チャットログ</h2>
         <ul>
           {chatLog.map((message, index) => (
-            <li key={index}>{message}</li>
+            <li key={index}>{message.message}</li>
           ))}
         </ul>
       </div>
