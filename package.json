@@ -20,13 +20,13 @@
   },
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "nodemon index.js",
+    "server": "nodemon --watch './**/*.ts' --exec 'ts-node' src/server/index.ts", 
     "client": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "prepare": "husky install",
-    "dev": "nodemon index.js"
+    "dev": "nodemon --watch './**/*.ts' --exec 'ts-node' src/server/index.ts" 
   },
   "eslintConfig": {
     "extends": [
@@ -47,7 +47,6 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/node": "^22.7.5",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
@@ -62,7 +61,9 @@
     "postcss": "^8.4.47",
     "prettier": "^3.3.3",
     "tailwindcss": "^3.4.13",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "concurrently": "^7.5.0",
+    "ts-node": "^10.9.1" 
   },
   "lint-staged": {
     "*.js": "eslint --cache --fix",
