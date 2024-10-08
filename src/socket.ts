@@ -51,17 +51,8 @@ export const onMatchFound = (
 };
 
 // ターン更新リスナー
-export const onActivePlayerUpdate = (
-  callback: (data: { activePlayer: string }) => void,
-) => {
+export const onTurnUpdate = (callback: (data: { roomData: any }) => void) => {
   socket.on("activePlayerUpdate", callback);
-};
-
-// メッセージ数更新リスナー
-export const onTurnCountUpdate = (
-  callback: (data: { messageCount: number }) => void,
-) => {
-  socket.on("turnCountUpdate", callback);
 };
 
 // バトル終了リスナー
