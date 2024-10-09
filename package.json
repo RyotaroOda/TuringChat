@@ -64,20 +64,5 @@
     "typescript": "^5.6.2",
     "concurrently": "^7.5.0",
     "ts-node": "^10.9.1" 
-  },
-  "lint-staged": {
-    "*.js": "eslint --cache --fix",
-    "src/**/*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --fix"
-    ],
-    "src/**/*.{css,json,scss,md}": [
-      "prettier --write"
-    ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   }
 }
