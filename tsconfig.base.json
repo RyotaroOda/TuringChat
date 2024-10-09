@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true
-  }
+    "target": "ES2017",            // 出力するJavaScriptのバージョン
+    "module": "ESNext",            // ESモジュールを使用
+    "strict": true,                // 厳格モードを有効化
+    "esModuleInterop": true,       // CommonJSとの互換性を有効にする
+    "skipLibCheck": true,          // ライブラリファイルの型チェックをスキップ
+    "forceConsistentCasingInFileNames": true, // ファイル名の大文字小文字を区別する
+    "moduleResolution": "node",    // Node.jsモジュール解決を使用
+    "resolveJsonModule": true,     // JSONファイルのインポートを許可
+    "isolatedModules": true        // モジュールごとのインポートを有効にする（特にReactで必要）
+  },
+  "exclude": ["node_modules"]       // node_modulesディレクトリを除外
 }

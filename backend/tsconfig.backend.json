@@ -1,0 +1,16 @@
+
+{
+  "extends": "../tsconfig.base.json",  // 共通設定を継承
+  "compilerOptions": {
+    "module": "CommonJS",              // Node.jsではCommonJSモジュールを使用
+    "outDir": "./dist",                // コンパイルされたファイルの出力先
+    "lib": ["esnext"],                 // 最新のJavaScript機能を使用
+    "baseUrl": "./src",                 // ベースのディレクトリを`src`に設定
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "dist"]  // node_modulesとdistディレクトリを除外
+  }
+  
