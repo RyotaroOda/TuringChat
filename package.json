@@ -22,6 +22,7 @@
     "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
     "start:frontend": "npm --prefix ./frontend run start",
     "start:backend": "npm --prefix ./backend run dev",
+    "build:backend": "npm --prefix ./backend run build",
     "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}'",
     "format": "prettier --write 'src/**/*.{ts,tsx,js,jsx}'",
     "install:all": "npm install && npm --prefix ./frontend install && npm --prefix ./backend install"

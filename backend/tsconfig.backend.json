@@ -9,9 +9,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "moduleResolution": "node",        // Node.jsのモジュール解決方式を使用
-    "target": "ES2020"                // 出力するJavaScriptのバージョン
+    "target": "ES2020",                // 出力するJavaScriptのバージョン
+    "diagnostics": true  // エラー診断情報の出力
   },
     "include": ["src/**/*"],
-    "exclude": ["node_modules", "dist"]  // node_modulesとdistディレクトリを除外
+    "exclude": ["node_modules", "dist"] // node_modulesとdistディレクトリを除外
   }
   
