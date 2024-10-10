@@ -2,8 +2,11 @@ import { io, Socket } from "socket.io-client";
 
 // サーバーとの接続を作成
 const socket: Socket = io("http://localhost:3000", {
-  transports: ["websocket"], // 必要に応じて設定
+  transports: ["websocket"], // WebSocketを明示的に使用
+  reconnectionAttempts: 5, // 再接続を試みる回数を設定
+  timeout: 10000, // タイムアウト設定
 });
+console.log("try to Connect to server");
 
 // サーバーとの接続状態をログに出力
 socket.on("connect", () => {

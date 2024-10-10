@@ -2,13 +2,14 @@
 {
   "extends": "../tsconfig.base.json",  // 共通設定を継承
   "compilerOptions": {
-    "module": "CommonJS",              // Node.jsではCommonJSモジュールを使用
+    "module": "CommonJS",
     "outDir": "./dist",                // コンパイルされたファイルの出力先
     "lib": ["esnext"],                 // 最新のJavaScript機能を使用
-    "baseUrl": "./src",                 // ベースのディレクトリを`src`に設定
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "moduleResolution": "node",        // Node.jsのモジュール解決方式を使用
+    "target": "ES2020"                // 出力するJavaScriptのバージョン
   },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "dist"]  // node_modulesとdistディレクトリを除外
