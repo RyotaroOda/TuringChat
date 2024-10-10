@@ -9,12 +9,7 @@ const socket_io_1 = require("socket.io");
 const uuid_1 = require("uuid");
 const app = (0, express_1.default)();
 const server = (0, http_1.createServer)(app);
-const io = new socket_io_1.Server(server, {
-    cors: {
-        origin: "http://localhost:3000",
-        methods: ["GET", "POST"],
-    },
-});
+const io = new socket_io_1.Server(server);
 const battleConfig = {
     maxTurn: 6 * 2,
     battleType: "single",
@@ -78,6 +73,7 @@ io.on("connection", (socket) => {
     });
     // メッセージ送信
     socket.on("sendMessage", (data) => {
+        var _a, _b;
         const { roomId, message } = data;
         // ルーム情報を取得
         const battleRoom = battleRooms[roomId];
@@ -86,7 +82,7 @@ io.on("connection", (socket) => {
             return;
         }
         // メッセージをバトルログに追加
-        battleRoom.battleLog?.messages.push({
+        (_a = battleRoom.battleLog) === null || _a === void 0 ? void 0 : _a.messages.push({
             senderId: socket.id,
             message,
         });
@@ -99,9 +95,7 @@ io.on("connection", (socket) => {
                     : battleRoom.player1;
         }
         // ターン上限に達した場合
-        if (battleRoom.battleLog &&
-            battleRoom.battleConfig &&
-            battleRoom.battleLog.currentTurn >= battleRoom.battleConfig.maxTurn) {
+        if (((_b = battleRoom.battleLog) === null || _b === void 0 ? void 0 : _b.currentTurn) >= battleRoom.battleConfig.maxTurn) {
             io.to(roomId).emit("battleEnd", { roomId });
             return;
         }

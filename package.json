@@ -19,7 +19,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "start:frontend": "npm --prefix ./frontend run start",
     "start:backend": "npm --prefix ./backend run dev",
     "build:backend": "npm --prefix ./backend run build",

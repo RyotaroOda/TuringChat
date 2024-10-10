@@ -1,7 +1,7 @@
 import { io, Socket } from "socket.io-client";
 
 // サーバーとの接続を作成
-const socket: Socket = io("http://localhost:3000", {
+const socket: Socket = io("http://localhost:3001", {
   transports: ["websocket"], // WebSocketを明示的に使用
   reconnectionAttempts: 5, // 再接続を試みる回数を設定
   timeout: 10000, // タイムアウト設定

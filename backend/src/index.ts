@@ -18,53 +18,36 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
   },
 });
-// バトル設定データを生成
-interface BattleConfig {
-  maxTurn: number;
-  battleType: string;
-  oneTurnTime: number;
-}
 
-const battleConfig: BattleConfig = {
+// バトル設定データを生成
+const battleConfig = {
   maxTurn: 6 * 2, // 最大ターン数
   battleType: "single", // バトルタイプ
   oneTurnTime: 60, // 1ターンの制限時間
-  //TODO: ChatTopic
 };
 
 // バトルログ
-interface BattleLog {
-  currentTurn: number;
-  messages: Array<{ senderId: string; message: string }>;
-  activePlayer: string | null;
-}
-
-const battleLog: BattleLog = {
+const battleLog = {
   currentTurn: 0,
   messages: [],
   activePlayer: null,
 };
 
 // ルーム情報を保持するオブジェクト
-interface BattleRoom {
-  roomId: string | null;
-  player1: string | null;
-  player2: string | null;
-  battleConfig: BattleConfig | null;
-  battleLog: BattleLog | null;
-}
+const battleRooms = {};
 
-const battleRooms: { [key: string]: BattleRoom } = {};
 
-// 待機プレイヤーの配列
-let waitingPlayers: Socket[] = []; //待機リスト
+// 待機プレイヤーの配列の型を定義
+let waitingPlayers: Socket[] = []; // 明示的にSocket型の配列として定義
+
 
 // WebSocket接続時の処理
-io.on("connection", (socket: Socket) => {
+io.on("connection", (socket) => {
   console.log("A player connected:", socket.id);
 
   // プレイヤーネームをクライアントから受信する
-  socket.on("savePlayerName", (name: string) => {
+  socket.on("savePlayerName", (name) => {
+    socket.data = socket.data || {};
     socket.data.playerName = name; // プレイヤーの名前をSocketインスタンスに保存
   });
 
@@ -77,9 +60,14 @@ io.on("connection", (socket: Socket) => {
       waitingPlayers.push(socket); //待機リストに追加
       console.log("No available players, waiting...");
     } else {
-      const player1 = waitingPlayers.pop() as Socket;
+      const player1 = waitingPlayers.pop();
       const player2 = socket;
       const roomId = uuidv4(); // ユニークなIdを生成
+
+      if (!player1) {
+        console.error("No player available for matching");
+        return;
+      }
 
       // ルーム固有の情報
       battleRooms[roomId] = {
@@ -114,7 +102,7 @@ io.on("connection", (socket: Socket) => {
   });
 
   // メッセージ送信
-  socket.on("sendMessage", (data: { roomId: string; message: string }) => {
+  socket.on("sendMessage", (data) => {
     const { roomId, message } = data;
 
     // ルーム情報を取得
@@ -125,7 +113,7 @@ io.on("connection", (socket: Socket) => {
     }
 
     // メッセージをバトルログに追加
-    battleRoom.battleLog?.messages.push({
+    battleRoom.battleLog.messages.push({
       senderId: socket.id,
       message,
     });
@@ -161,13 +149,13 @@ io.on("connection", (socket: Socket) => {
   // プレイヤーが切断したときの処理
   socket.on("disconnect", () => {
     // プレイヤーが待機中のリストにいたら削除
-    waitingPlayers = waitingPlayers.filter((player) => player.id !== socket.id);
+    waitingPlayers = waitingPlayers.filter((player: { id: string }) => player.id !== socket.id);
     console.log("Player disconnected:", socket.id);
   });
 });
 
 // ポート番号の設定
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // サーバー起動
 server.listen(PORT, () => {
